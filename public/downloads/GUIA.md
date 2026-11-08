@@ -221,4 +221,20 @@ El entorno no dispone del helper de navegador `cua_repl.js`; siguiendo el flujo 
 
 No se migra el proyecto Supabase anterior ni se verifican valores del juego. No se crean cuentas OAuth, secretos de proveedores, SMTP, dominio externo ni permisos Cloudflare sin configuración real. No hay valoración oficial, pagos reales, chat, verificación automática de identidad Roblox, reseñas ni moderación operativa. Los contadores de anuncios completados son declarados por su propietario; no demuestran una transferencia en Roblox. Los textos legales son plantillas pendientes de revisión del responsable. El objetivo de coste cero depende de mantenerse dentro de cuotas y de las condiciones de los proveedores.
 
+<!-- coderabbit-ai-generated:v1 -->
+
+<!-- coderabbit-ai-generated-section:v1:ac4da51531e9e68050ea3b8f9db36cb0e825a38584e959ca06b88eeae04f4566 -->
+
 AUTOAUDITORÍA DOCUMENTAL: ✔ alcance, módulos y pendientes declarados; validaciones reproducibles entregadas; aplicación Supabase remota, OAuth/email, navegador y métricas de campo pendientes de configuración y verificación.
+
+## Comparador de ítems (noviembre 2026)
+
+`/compare/` compara hasta cuatro ítems por slug en `?items=ice-sun,rally`. Se validan contra el catálogo; duplicados, desconocidos y excesos se descartan con aviso. Compartir conserva la selección y usa el catálogo disponible al abrir el enlace; no congela precios. Si falla el portapapeles, se ofrece un campo seleccionable.
+
+Con dos ítems, el acceso a la calculadora recibe el primero y da el segundo. Se oculta si alguno figura como no intercambiable. Disponibilidad desconocida permanece desconocida. Se conservan los límites y validaciones existentes de la calculadora.
+
+El catálogo muestra cobertura de valor, demanda y disponibilidad. Cero es conocido y `false` es disponibilidad registrada. Accesos desde navegación, pie, catálogo y fichas.
+
+Ejecutar los controles del README y comprobar en Chromium enlaces, límite, atrás/adelante, transferencia a calculadora y desbordamiento móvil. Comparación de referencias y criterios: [IMPROVEMENTS.md](IMPROVEMENTS.md).
+
+<!-- /coderabbit-ai-generated:v1 -->
