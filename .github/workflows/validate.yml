@@ -1,0 +1,34 @@
+name: Validate TurboSoccer
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: validate-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_PUBLIC_SITE_URL: https://turbo-soccer-values-hub.civilmarmot8.chatgpt.site
+      NEXT_PUBLIC_SUPABASE_URL: ''
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ''
+      NEXT_PUBLIC_DEMO: '0'
+      NEXT_PUBLIC_DEBUG_LOGS: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm run typecheck
+      - run: node --test
+      - run: node scripts/module-inventory.mjs
+      - run: node scripts/package-source.mjs
+      - run: npm run build
+      - run: node scripts/verify-export.mjs

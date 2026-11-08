@@ -1,0 +1,52 @@
+name: Deploy to Cloudflare Pages
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: pages-production
+  cancel-in-progress: false
+jobs:
+  deploy:
+    if: ${{ vars.CF_PAGES_PROJECT != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+      NEXT_PUBLIC_AUTH_EMAIL_ENABLED: ${{ vars.NEXT_PUBLIC_AUTH_EMAIL_ENABLED || 'false' }}
+      NEXT_PUBLIC_SENTRY_DSN: ${{ vars.NEXT_PUBLIC_SENTRY_DSN || '' }}
+      NEXT_PUBLIC_DEBUG_LOGS: 'false'
+      NEXT_PUBLIC_DEMO: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Validate deployment variables
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$NEXT_PUBLIC_SITE_URL" || { echo 'Set NEXT_PUBLIC_SITE_URL in repository Variables.' >&2; exit 1; }
+          test -n "$NEXT_PUBLIC_SUPABASE_URL" || { echo 'Set the NEW Supabase project URL in repository Variables.' >&2; exit 1; }
+          test -n "$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY" || { echo 'Set the NEW project publishable key in repository Variables.' >&2; exit 1; }
+          case "$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY" in sb_publishable_*) ;; *) echo 'Expected a publishable key.' >&2; exit 1;; esac
+      - run: npm ci --no-audit --no-fund
+      - run: npm run typecheck
+      - run: node --test
+      - run: node scripts/module-inventory.mjs
+      - run: node scripts/package-source.mjs
+      - run: npm run build
+      - run: node scripts/verify-export.mjs
+      - name: Direct Upload
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CF_PAGES_PROJECT: ${{ vars.CF_PAGES_PROJECT }}
+        run: npx wrangler@4 pages deploy out --project-name "$CF_PAGES_PROJECT" --branch main

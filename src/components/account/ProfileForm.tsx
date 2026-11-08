@@ -1,0 +1,16 @@
+'use client';
+import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { Save, ShieldCheck, UserRound } from 'lucide-react';
+import { updateMyProfile, confirmMyAge } from '@/lib/data/account';
+import { validateProfileInput } from '@/lib/data/accountValidation';
+import type { fetchMyProfile } from '@/lib/data/profiles';
+type MyProfile = NonNullable<Awaited<ReturnType<typeof fetchMyProfile>>>;
+export function ProfileForm({ profile, onSaved }: { profile: MyProfile; onSaved: () => void }) {
+  const [username, setUsername] = useState(profile.username), [robloxUsername, setRobloxUsername] = useState(profile.roblox_username ?? ''), [bio, setBio] = useState(profile.bio), [error, setError] = useState('');
+  const [age, setAge] = useState(false);
+  const save = useMutation({ mutationFn: updateMyProfile, onSuccess: onSaved, onError: () => setError('Your changes could not be saved. Check your connection or try a different username.') });
+  const confirm = useMutation({ mutationFn: confirmMyAge, onSuccess: onSaved });
+  function submit(event: React.FormEvent) { event.preventDefault(); const input = { username, robloxUsername, bio }; const invalid = validateProfileInput(input); setError(invalid ?? ''); if (!invalid) save.mutate(input); }
+  return <section className="panel profile-editor"><div className="account-section-title"><UserRound size={20}/><div><h2>Your public profile</h2><p>Share a username, never your account credentials.</p></div></div><form onSubmit={submit}><div className="account-field-grid"><label className="field">Community username<input value={username} onChange={e => setUsername(e.target.value)} autoComplete="username" minLength={3} maxLength={20} pattern="[a-z0-9_]{3,20}" required/><small>3–20 lowercase letters, numbers or underscores.</small></label><label className="field">Roblox username<input value={robloxUsername} onChange={e => setRobloxUsername(e.target.value)} autoComplete="off" minLength={3} maxLength={20} pattern="[A-Za-z0-9_]{3,20}"/><small>This is a public handle. It does not verify ownership.</small></label></div><label className="field account-bio">About you <textarea value={bio} onChange={e => setBio(e.target.value)} maxLength={280} rows={3}/><small>{bio.length}/280 characters · Publicly visible</small></label>{error && <p className="form-error" role="alert">{error}</p>}<button className="btn btn-primary" disabled={save.isPending}><Save size={16}/>{save.isPending ? 'Saving…' : 'Save profile'}</button></form><div className="account-age"><ShieldCheck size={19}/>{profile.ageConfirmed ? <div><strong>Age requirement confirmed</strong><p>You have confirmed you are at least 16. No birth date is stored.</p></div> : <div><strong>One more step before trading</strong><label className="age-checkbox"><input type="checkbox" checked={age} onChange={e => setAge(e.target.checked)}/>I am at least 16 years old.</label><button className="btn btn-secondary" disabled={!age || confirm.isPending} onClick={() => confirm.mutate()}>{confirm.isPending ? 'Confirming…' : 'Confirm age'}</button>{confirm.isError && <p role="alert" className="form-error">Age confirmation failed. Please retry.</p>}</div>}</div></section>;
+}

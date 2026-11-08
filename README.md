@@ -58,3 +58,12 @@ La colección de [composio-community/awesome-codex-skills](https://github.com/co
 ## Validación en GitHub
 
 `validate.yml` comprueba instalación limpia, tipos, tests, exportación estática y enlaces con el snapshot sin credenciales. Los workflows de despliegue y keepalive permanecen condicionados a configuración explícita; no apuntan a la base de producción anterior.
+
+Instalación de las skills en un clon nuevo:
+
+```bash
+python3 scripts/install-codex-skills.py
+python3 scripts/install-codex-skills.py --check
+```
+
+En Windows con Python instalado como `python`, usa `python` en lugar de `python3`. La conversión del CSV anterior es local y necesita revisión humana: consulta el checklist antes de ejecutar `node scripts/import-legacy-csv.mjs`.

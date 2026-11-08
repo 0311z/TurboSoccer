@@ -1,0 +1,130 @@
+STACK Y VERSIONES
+Usa Next.js 16, React 19, TypeScript 5 y Tailwind CSS 4.
+Usa Node 22 LTS o una versión compatible con Node >=20.9.
+Conserva package-lock.json y ejecuta npm ci para instalaciones repetibles.
+Mantén el coste objetivo dentro de los planes gratuitos sin prometer disponibilidad.
+ARQUITECTURA Y CARPETAS
+Compón rutas en src/app y coloca interacción en src/components.
+Mantén datos, validación y acceso externo en src/lib.
+Separa tipos, configuración, seeds y migraciones en sus directorios propios.
+Evita archivos index.ts usados como barriles.
+LÍMITES DE TAMAÑO
+Limita cada archivo TS/TSX a 150 líneas.
+Divide módulos por responsabilidad y documenta contratos al cambiar exports.
+TYPESCRIPT
+Activa strict y noUncheckedIndexedAccess.
+Valida datos externos antes de convertirlos al dominio.
+Prohíbe any, @ts-ignore y aserciones de no nulo sin validación.
+✅ Haz: valida Number.isSafeInteger(value) antes de sumar coins.
+❌ No hagas: convierte un valor desconocido a cero.
+REACT/NEXT
+Conserva output: 'export', trailingSlash: true e images.unoptimized: true.
+Prohíbe Server Actions, Route Handlers dinámicos, middleware, proxy e ISR.
+Prohíbe cookies(), headers() y dependencias de servidor en hojas cliente.
+Espera params en rutas dinámicas y generateMetadata.
+Devuelve al menos el seed en generateStaticParams.
+Envuelve useSearchParams en Suspense cuando se utilice.
+Mantén metadata y generateMetadata en Server Components.
+Usa force-static en sitemap y robots.
+Evita valores aleatorios o tiempos locales durante el primer render.
+✅ Haz: const { slug } = await params;
+❌ No hagas: lee params.slug de forma síncrona.
+TAILWIND v4 Y UI
+Define tokens CSS-first con @theme e importa tailwindcss.
+Mantén dark por defecto, contraste AA y controles reconocibles.
+Usa dialog nativo y restaura el foco al cerrarlo.
+Mantén cada objetivo táctil principal en 44 px o más.
+Respeta prefers-reduced-motion y evita animaciones decorativas continuas.
+ESTADO Y DATOS
+Usa TanStack Query 5 con firmas de objeto e initialData del catálogo.
+Comparte filtros y estado de calculadora mediante URL validada.
+Limita cada lado a ocho ítems distintos y cantidades de 1 a 99.
+Valida las sumas como enteros seguros y limita coins a 1000000000000.
+Muestra unknown si falta el valor de un ítem.
+Muestra estados loading, empty, error, unavailable y offline honestos.
+No presentes ausencia de configuración como una respuesta vacía del mercado.
+✅ Haz: muestra '—' con 'No value set yet' para NULL.
+❌ No hagas: inventa precios, demanda o anuncios para llenar la interfaz.
+SUPABASE
+Usa solo el proyecto nuevo preparado para esta base.
+No conectes, migres ni reutilices el proyecto de producción anterior.
+Usa NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY con acceso estático.
+Mantén un singleton de navegador con PKCE y detección de sesión en URL.
+Usa un cliente de build sin persistencia de sesión.
+No esperes llamadas Supabase dentro de onAuthStateChange.
+Autoriza en SQL mediante profiles.role y no mediante user_metadata.
+Activa RLS en toda tabla y limita privilegios con revoke/grant explícitos.
+Permite escrituras de negocio solo mediante RPC validadas.
+Fija search_path = '' en SECURITY DEFINER y califica nombres SQL.
+No registres claves, cabeceras de autenticación ni datos personales.
+✅ Haz: aplica auth.uid() y perfiles en las políticas SQL.
+❌ No hagas: confía en controles cliente para autorizar escrituras.
+LOGGING Y ERRORES
+Usa trace(scope, payload) para cada operación de entrada/salida.
+Registra t.step, t.ok y t.fail dentro de try/catch.
+Redacta password, token, access_token, refresh_token, authorization, apikey y email.
+Muestra únicamente mensajes de error seguros en la interfaz.
+Conserva code, details y hint de PostgREST en trazas redactadas.
+No uses console fuera del logger salvo scripts Node independientes.
+SEGURIDAD Y PRIVACIDAD
+Bloquea URLs y términos de pagos reales en notas y mensajes, en cliente y RPC.
+No solicites contraseñas de Roblox ni cookies de sesión de Roblox.
+Exige consentimiento de edad mínima 16 antes de publicar u ofertar.
+Mantén información privada fuera de tablas de lectura pública.
+No muestres testimonios, reputación o métricas que no procedan de datos reales.
+No actives analítica, captcha ni Sentry sin configurar y verificar su integración.
+SEO Y RENDIMIENTO
+Mantén canonical con barra final y URLs del sitio realmente configurado.
+Usa solo rutas entregadas en Navbar, Footer y sitemap.
+Usa WebSite, ItemList, BreadcrumbList y WebPage en JSON-LD.
+Prohíbe Product, Offer y AggregateRating para coins de juego.
+Escapa '<' al serializar JSON-LD.
+Marca auth y páginas privadas como noindex.
+Mide rendimiento antes de afirmar que se cumplen presupuestos.
+ACCESIBILIDAD
+Mantén lang='en', skip link, labels, encabezados semánticos y foco visible.
+Usa tablas HTML reales para vista tabla y controles con nombres accesibles.
+Anuncia resultados de calculadora mediante aria-live.
+Permite usar toda interacción principal con teclado.
+ASSETS
+Usa assets locales con dimensiones explícitas o fallback por categoría.
+No infieras nombres o precios a partir de miniaturas del repositorio anterior.
+No hagas hotlinking de la CDN de Roblox.
+Mantén atribución, licencia y contacto de retirada antes de publicar assets de terceros.
+GIT
+Usa Conventional Commits y rutas explícitas en git add.
+Ejecuta npm run typecheck y npm run build antes de un checkpoint verde.
+No registres ni sobrescribas un proyecto Sites ya identificado.
+No publiques secretos ni archivos .env.local.
+Pide instrucciones explícitas antes de reset destructivo o cambios de audiencia.
+✅ Haz: git add src/components/items/ItemImage.tsx
+❌ No hagas: git add -A sin revisar el alcance.
+DEPENDENCIAS
+Mantén dependencias dentro de la allowlist del documento maestro.
+Permite next, react, react-dom, typescript, tailwindcss y @tailwindcss/postcss.
+Permite @supabase/supabase-js, @tanstack/react-query, zustand y zod.
+Permite tailwind-merge, motion, lucide-react, clsx y server-only cuando sean necesarios.
+Permite @sentry/nextjs solo si su integración completa está entregada.
+Permite @types/node, @types/react, @types/react-dom, eslint, eslint-config-next, sharp y wrangler como herramientas.
+Prohíbe @supabase/ssr, @cloudflare/next-on-pages, axios, moment, dayjs, lodash y redux.
+Prohíbe MUI, Chakra, Ant, Bootstrap, Radix, Headless UI y generadores shadcn.
+Prohíbe next-themes, sonner, react-hot-toast, formik, react-hook-form y jQuery.
+Prohíbe bibliotecas adicionales de iconos, gráficos o estilos en tiempo de ejecución.
+ANTI-ALUCINACIÓN
+Limita el seed a nombres documentados y conserva value/demand desconocidos como NULL.
+Declara decisiones no verificadas como ASSUMPTION numeradas.
+Distingue comprobación ejecutada, revisión estática y configuración pendiente.
+No presentes SQL no aplicado como verificado en una base de datos.
+No prometas que un keepalive garantiza que un proveedor no pausará un proyecto.
+RECETAS
+Añade categorías en migración, seed, tipos y filtros de forma coordinada.
+Añade RPC con validación, autorización SQL, revoke/grant, traza y prueba negativa.
+Añade páginas con metadatos, canonical y enlaces únicamente cuando existan.
+Añade ítems con fuente verificable, slug estable y valores desconocidos sin inferencia.
+CHECKLIST PRE-COMMIT
+Comprueba types, build, límites de líneas, imports y rutas entregadas.
+Comprueba RLS, privilegios, búsqueda SQL y límites de RPC en un proyecto nuevo.
+Comprueba ausencia de secretos y datos falsos.
+Comprueba navegación, teclado, responsive y estados de error.
+Actualiza docs/DELIVERY.md y docs/MODULES.md al cambiar contratos.
+Declara cualquier comprobación no realizada sin marcarla como aprobada.

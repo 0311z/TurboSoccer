@@ -1,0 +1,6 @@
+import type { Metadata } from 'next';
+import { TradeCalculator } from '@/components/trading/TradeCalculator';
+export const metadata: Metadata = { title: 'Trade Calculator', description: 'Compare Turbo Soccer items and coins, understand trade fairness and share your calculation.', alternates: { canonical: '/calculator/' } };
+export default function CalculatorPage() {
+  return <div className="container page-content"><div className="page-heading"><span className="eyebrow">THE NUMBERS BEHIND THE TRADE</span><h1>Make your next trade<br/><span>your best trade.</span></h1><p>Build both sides. Compare the value. Trade with confidence.</p></div><TradeCalculator/><div className="calculator-guidance"><article><span>01</span><h3>Build the trade</h3><p>Add up to eight different items per side, adjust quantities, and include coins.</p></article><article><span>02</span><h3>Check the balance</h3><p>Compare the value from your perspective as the trader accepting the offer. A 10% difference is considered fair.</p></article><article><span>03</span><h3>Share your comparison</h3><p>Copy a link with both sides included. No account needed, and your draft stays in this browser.</p></article></div></div>;
+}

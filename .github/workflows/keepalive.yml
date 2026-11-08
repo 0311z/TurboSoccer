@@ -1,0 +1,27 @@
+name: Supabase daily health check
+on:
+  schedule:
+    - cron: '41 8 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: supabase-health
+  cancel-in-progress: false
+jobs:
+  ping:
+    if: ${{ vars.NEXT_PUBLIC_SUPABASE_URL != '' && vars.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    env:
+      SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+      SUPABASE_PUBLISHABLE_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+    steps:
+      - name: Call public health RPC
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$SUPABASE_PUBLISHABLE_KEY" in sb_publishable_*) ;; *) echo 'Expected a publishable key.' >&2; exit 1;; esac
+          curl --fail --silent --show-error --max-time 30 --request POST \
+            --header "apikey: $SUPABASE_PUBLISHABLE_KEY" \
+            "$SUPABASE_URL/rest/v1/rpc/ping"

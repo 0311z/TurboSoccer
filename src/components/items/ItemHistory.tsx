@@ -1,0 +1,19 @@
+'use client';
+import {useState} from 'react';
+import {History,RefreshCw} from 'lucide-react';
+import type {ItemSignals} from '@/lib/data/itemSignals';
+type Entry=ItemSignals['history'][number];
+const format=(value:number)=>new Intl.NumberFormat('en-US',{maximumFractionDigits:0}).format(value);
+const date=(value:string)=>new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',timeZone:'UTC'}).format(new Date(value));
+export function ItemHistory({history,pending,error,onRetry}:{history:Entry[];pending:boolean;error:boolean;onRetry:()=>void}){
+ const [range,setRange]=useState<'all'|'7'|'30'>('all'),[cutoff,setCutoff]=useState(0);
+ const filtered=history.filter(record=>Date.parse(record.created_at)>=cutoff);
+ const valued=filtered.filter((record):record is Entry&{value:number}=>record.value!==null),values=valued.map(record=>record.value);
+ const min=values.length?Math.min(...values):0,max=values.length?Math.max(...values):0;
+ const first=Date.parse(valued[0]?.created_at??''),last=Date.parse(valued[valued.length-1]?.created_at??'');
+ const points=valued.map(record=>`${32+((Date.parse(record.created_at)-first)/Math.max(last-first,1))*536},${max===min?85:145-((record.value-min)/(max-min))*115}`).join(' ');
+ function selectRange(value:'all'|'7'|'30'){setRange(value);setCutoff(value==='all'?0:Date.now()-Number(value)*86400000);}
+ return <section className="panel history-panel" id="value-history"><div className="history-heading"><h2><History size={18}/> Value history</h2>{history.length>1&&<div className="history-ranges" role="group" aria-label="History period">{(['7','30','all'] as const).map(value=><button key={value} type="button" aria-pressed={range===value} onClick={()=>selectRange(value)}>{value==='all'?'All time':`${value}D`}</button>)}</div>}</div>{error&&<div className="item-refresh-error" role="status">Latest history refresh failed. Cached records may be shown.<button className="text-link" onClick={onRetry}><RefreshCw size={13}/> Retry</button></div>}
+ {pending&&!history.length?<div className="signal-placeholder" aria-busy="true"><History size={27}/><p>Loading recorded appraisals…</p></div>:valued.length>1?<><div className="history-chart"><div className="history-y-labels"><span>{format(max)}</span>{max!==min&&<span>{format(min)}</span>}</div><svg viewBox="0 0 600 175" role="img" aria-label={`${valued.length} recorded values from ${format(valued[0]?.value??0)} to ${format(valued[valued.length-1]?.value??0)} coins`}><path d="M32 30H568M32 85H568M32 145H568" fill="none" stroke="currentColor" strokeDasharray="3 5" opacity=".12"/><polyline points={points} fill="none" stroke="var(--violet)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg><div className="history-x-labels"><span>{date(valued[0]?.created_at??'')}</span><span>{date(valued[valued.length-1]?.created_at??'')}</span></div></div><p className="history-caption">{valued.length} appraisals in this period · Values in coins · Dates in UTC</p></>:<div className="signal-placeholder"><History size={28}/><h3>{history.length?'Not enough records in this period.':'No recorded values yet.'}</h3><p>{history.length?'A chart needs at least two known values. Every recorded appraisal remains available below.':'Community appraisals will appear here. We never invent a value or fill the gaps.'}</p>{range!=='all'&&<button className="text-link" onClick={()=>selectRange('all')}>Show all time</button>}</div>}
+ {history.length>0&&<div className="history-records"><h3>Latest appraisals</h3><div className="history-records-list">{history.slice(-6).reverse().map((record,index)=><div key={`${record.created_at}-${index}`}><time dateTime={record.created_at}>{date(record.created_at)}</time><span>{record.reason||'Community appraisal'}</span><strong title={record.value===null?'Value not set':String(record.value)}>{record.value===null?'—':format(record.value)} <small>coins</small></strong></div>)}</div></div>}</section>;
+}

@@ -1,0 +1,15 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import vm from 'node:vm';
+import ts from 'typescript';
+const exports={};
+const code=ts.transpileModule(readFileSync(new URL('./redact.ts',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText;
+vm.runInNewContext(code,{exports,URL,WeakSet,Error,Object,Array,String});
+const {redact,sanitizeText}=exports;
+test('redacts structured secrets but preserves business error codes',()=>{const result=redact({email:'player@example.test',access_token:'private-value',code:'23505',details:'item exists',nested:{Authorization:'Bearer private'}});assert.equal(result.email,'[REDACTED]');assert.equal(result.access_token,'[REDACTED]');assert.equal(result.code,'23505');assert.equal(result.details,'item exists');assert.equal(result.nested.Authorization,'[REDACTED]');});
+test('redacts credentials and email embedded in error messages',()=>{const text=sanitizeText('Failed for player@example.test with Bearer abc.def.ghi and password="do not reveal"');assert.ok(!text.includes('player@example.test'));assert.ok(!text.includes('abc.def.ghi'));assert.ok(!text.includes('do not reveal'));assert.ok(text.includes('[REDACTED]'));});
+test('redacts URL userinfo, sensitive query parameters and fragments',()=>{const text=sanitizeText('https://alice:pass@example.test/path?code=private-code&item=rally#private-fragment');assert.ok(!text.includes('alice'));assert.ok(!text.includes('pass@'));assert.ok(!text.includes('private-code'));assert.ok(!text.includes('private-fragment'));assert.ok(text.includes('item=rally'));});
+test('serializes circular structures without evaluating accessors',()=>{let accessed=false;const input={safe:'yes'};input.self=input;Object.defineProperty(input,'explosive',{get(){accessed=true;throw new Error('never evaluate');}});const result=redact(input);assert.equal(result.safe,'yes');assert.equal(result.self,'[CIRCULAR]');assert.equal(result.explosive,'[ACCESSOR OMITTED]');assert.equal(accessed,false);});
+test('preserves sanitized error stack and cause without sensitive text',()=>{const error=new Error('email=player@example.test');error.cause={token:'private'};const result=redact(error);assert.ok(result.stack);assert.ok(!result.message.includes('player@example.test'));assert.equal(result.cause.token,'[REDACTED]');});
+test('bounds large payloads and supports null/bigint safely',()=>{assert.equal(redact(null),null);assert.equal(redact(42n),'42');assert.equal(redact(Array(140).fill('x')).length,100);assert.ok(sanitizeText('x'.repeat(13000)).endsWith('[TRUNCATED]'));});
